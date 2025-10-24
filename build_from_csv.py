@@ -3,7 +3,6 @@ import csv, sys, re, unicodedata
 from pathlib import Path
 from html import escape
 
-# ---------- Site Text ----------
 FOOTER_LINE = "Family memorials for Clarissa and Robert’s wedding on 10/25/2025 at Camp Pinnacle in Flat Rock, NC."
 MAP_TITLE = "Memorials & Locations"
 MAP_INTRO = (
@@ -11,7 +10,6 @@ MAP_INTRO = (
     "Walk the camp to find each memorial. Every page includes a few images and a short reflection."
 )
 
-# ---------- Paths ----------
 REPO_ROOT = Path(__file__).resolve().parent
 DOCS = REPO_ROOT / "docs"
 CSV_DEFAULT = DOCS / "memorials_completed_with_images.csv"
@@ -33,7 +31,6 @@ def read_rows(csv_path):
             name = (row.get("name") or "").strip()
             if not name:
                 continue
-            # Collect up to 4 non-blank images; no auto-extension
             imgs = []
             for i in range(1,5):
                 p = (row.get(f"image{i}") or "").strip()
@@ -64,6 +61,13 @@ PAGE_TMPL = """<!doctype html>
   <meta name="description" content="A short remembrance of {desc}.">
   <link rel="stylesheet" href="../../assets/style.css">
   <meta name="robots" content="noindex,follow">
+  <style>
+    /* Inline helpers; braces escaped for Python .format */
+    .years {{ font-weight: 700; font-size: 1.125rem; margin: 0.25rem 0 1rem; }}
+    figure {{ margin: 0 0 1rem; }}
+    figcaption {{ font-size: 0.9rem; opacity: 0.9; margin-top: 0.35rem; }}
+    .backlink {{ margin-top: 1.25rem; font-size: 1.1rem; font-weight: 700; }}
+  </style>
 </head>
 <body>
   <a class="skip" href="#content">Skip to content</a>
@@ -74,7 +78,7 @@ PAGE_TMPL = """<!doctype html>
     {years_html}
     {images_html}
     {story_html}
-    <p class="small"><a href="../../map.html">Back to memorials &amp; locations</a></p>
+    <p class="backlink"><a href="../../map.html"><strong>View all memorials &amp; locations →</strong></a></p>
   </main>
   <footer>
     <p class="small">{footer_line}</p>
@@ -84,11 +88,16 @@ PAGE_TMPL = """<!doctype html>
 """
 
 def build_images_html(images):
-    # Only render provided images (skip blanks)
+    # Render images and always print the alt text below each as a caption
     tags = []
     for path, alt in images:
         alt_attr = escape(alt) if alt else "Memorial photo"
-        tags.append(f'<figure><img src="../../{escape(path)}" alt="{alt_attr}" loading="lazy" decoding="async"></figure>')
+        cap = escape(alt) if alt else ""
+        tags.append(
+            f'<figure><img src="../../{escape(path)}" alt="{alt_attr}" loading="lazy" decoding="async">'
+            + (f"<figcaption>{cap}</figcaption>")
+            + "</figure>"
+        )
     return "\n    ".join(tags)
 
 def build_story_html(story):
@@ -104,7 +113,7 @@ def write_page(row):
     out_dir = PEOPLE / slug
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    years_html = f'<p class="small">{escape(row["years"])}</p>' if row["years"] else ""
+    years_html = f'<p class="years">{escape(row["years"])}</p>' if row["years"] else ""
     images_html = build_images_html(row["images"])
     story_html = build_story_html(row["story"]) or ""
 
@@ -123,11 +132,10 @@ def write_map(rows):
     items = []
     for row in rows:
         name = escape(row["name"])
-        slug = row["slug"]
         loc = escape(row["location"]) if row["location"] else ""
         loc_div = f'<div class="small">Location: {loc}</div>' if loc else ""
         items.append(f"""<li>
-        <strong><a href="./people/{slug}/">{name}</a></strong>
+        <strong>{name}</strong>
         {loc_div}
       </li>""")
 
@@ -160,7 +168,6 @@ def write_map(rows):
     (DOCS / "map.html").write_text(page, encoding="utf-8")
 
 def main():
-    # Optional: allow overriding CSV path via CLI
     csv_path = Path(sys.argv[1]) if len(sys.argv) > 1 else CSV_DEFAULT
     if not csv_path.exists():
         print(f"CSV not found: {csv_path}")
