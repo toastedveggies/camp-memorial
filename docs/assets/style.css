@@ -1,0 +1,22 @@
+
+:root{--fg:#111;--bg:#fff;--muted:#555;--line:#eee;--max:720px}
+@media (prefers-color-scheme: dark){:root{--fg:#eee;--bg:#0b0b0c;--muted:#aaa;--line:#1e1e20}}
+*{box-sizing:border-box}
+html{font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";}
+body{margin:0;background:var(--bg);color:var(--fg);line-height:1.55}
+main{max-width:var(--max);margin:0 auto;padding:20px}
+header,footer{max-width:var(--max);margin:0 auto;padding:14px 20px}
+header{border-bottom:1px solid var(--line)}
+footer{border-top:1px solid var(--line);color:var(--muted);font-size:0.9rem}
+h1,h2{line-height:1.2;margin:0 0 0.5em}
+p{margin:0 0 1em}
+a{color:inherit;text-decoration-thickness:from-font;text-underline-offset:3px}
+figure{margin:0 0 1rem}
+img{display:block;max-width:100%;height:auto;border-radius:10px}
+.small{font-size:0.9rem;color:var(--muted)}
+.list{list-style:none;padding:0;margin:0.5rem 0}
+.list li{padding:10px 0;border-bottom:1px dashed var(--line)}
+.badge{display:inline-block;font-size:.75rem;padding:.2rem .5rem;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+.btn{display:inline-block;padding:.6rem .9rem;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+.center{text-align:center}
+.skip{position:absolute;left:-9999px}
